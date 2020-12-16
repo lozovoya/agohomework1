@@ -13,7 +13,7 @@ import (
 
 const defaultPort = "9999"
 const defaultHost = "0.0.0.0"
-const dbcon = "postgres://app:pass@bankdb:5432/db"
+const dbcon = "postgres://app:pass@localhost:5432/db"
 
 func main() {
 	port, ok := os.LookupEnv("PORT")

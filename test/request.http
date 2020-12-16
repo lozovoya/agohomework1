@@ -1,0 +1,31 @@
+
+
+### Добавление пользователя
+###
+PUT http://localhost:9999/api/users
+Content-Type: application/json
+
+{
+  "login":"user1",
+  "password":"pass1"
+}
+
+### Добавление кривого пользователя
+###
+PUT http://localhost:9999/api/users
+Content-Type: application/json
+
+{
+  "login":"",
+  "password":"pass1"
+}
+
+### Кривой URL
+###
+PUT http://localhost:9999/api/userrrr
+Content-Type: application/json
+
+{
+  "login":"user1",
+  "password":"pass1"
+}
