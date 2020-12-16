@@ -1,0 +1,21 @@
+
+version: '3.8'
+
+services:
+  bankdb:
+    image: postgres:13.1-alpine
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_USER=app
+      - POSTGRES_DB=db
+    volumes:
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+
+  app:
+    build: .
+    depends_on:
+      - bankdb
+    ports:
+      - 9999:9999
