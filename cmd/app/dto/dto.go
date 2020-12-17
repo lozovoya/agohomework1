@@ -1,6 +1,15 @@
 package dto
 
 type User struct {
-	login    string `json:"login"`
-	password string `json:"password"`
+	Login    string `json:"login"`
+	Password string `json:"password"`
+	Roles    string `json:"roles"`
+}
+
+type UserId struct {
+	Id int `json:"id"`
+}
+
+type ErrResp struct {
+	Error string `json:"txt"`
 }

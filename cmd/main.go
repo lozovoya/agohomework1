@@ -43,7 +43,7 @@ func execute(addr string, dbcon string) error {
 	}
 	defer pool.Close()
 
-	application := app.NewServer(mux, pool)
+	application := app.NewServer(mux, pool, ctx)
 	err = application.Init()
 	if err != nil {
 		return err

@@ -7,7 +7,8 @@ Content-Type: application/json
 
 {
   "login":"user1",
-  "password":"pass1"
+  "password":"pass1",
+  "roles":"{ADMIN USER}"
 }
 
 ### Добавление кривого пользователя
