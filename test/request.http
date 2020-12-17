@@ -2,7 +2,7 @@
 
 ### Добавление пользователя
 ###
-PUT http://localhost:9999/api/users
+POST http://localhost:9999/api/users
 Content-Type: application/json
 
 {
@@ -13,7 +13,7 @@ Content-Type: application/json
 
 ### Добавление кривого пользователя
 ###
-PUT http://localhost:9999/api/users
+POST http://localhost:9999/api/users
 Content-Type: application/json
 
 {
@@ -23,7 +23,17 @@ Content-Type: application/json
 
 ### Кривой URL
 ###
-PUT http://localhost:9999/api/userrrr
+POST http://localhost:9999/api/userrrr
+Content-Type: application/json
+
+{
+  "login":"user1",
+  "password":"pass1"
+}
+
+### Запрос токена
+###
+POST http://localhost:9999/api/token
 Content-Type: application/json
 
 {
