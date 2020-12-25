@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/lozovoya/agohomework1.git/cmd/app/dto"
+	"github.com/lozovoya/agohomework1.git/cmd/app/md"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
@@ -34,8 +35,14 @@ func NewServer(mux chi.Router, pool *pgxpool.Pool, ctx context.Context) *Server 
 }
 
 func (s *Server) Init() error {
-	s.mux.With(middleware.Logger).Post("/api/users", s.AddUser)
-	s.mux.With(middleware.Logger).Post("/api/token", s.Token)
+
+	identMD := md.IdentMD
+	logMD := middleware.Logger
+
+	s.mux.With(logMD).Post("/api/users", s.AddUser)
+	s.mux.With(logMD).Post("/api/token", s.Token)
+	s.mux.With(logMD, identMD, md.AuthMD(s.ctx, s.pool)).Post("/api/getcards", s.GetCards)
+
 	return nil
 }
 
@@ -143,11 +150,20 @@ func (s *Server) Token(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
+
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(200)
-	err = json.NewEncoder(w).Encode(dto.Token{Token: token})
+	err = json.NewEncoder(w).Encode(dto.TokenDTO{Token: token.String()})
 	if err != nil {
 		log.Println(err)
 		return
 	}
+}
+
+func (s *Server) GetCards(w http.ResponseWriter, r *http.Request) {
+
+	value := r.Context().Value(md.RolesContextKey)
+	log.Println(value)
+	w.Write([]byte("value"))
+
 }

@@ -6,3 +6,9 @@ CREATE TABLE users (
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE cards (
+                       id BIGSERIAL PRIMARY KEY,
+                       number INT NOT NULL UNIQUE,
+                       owner BIGINT NOT NULL REFERENCES users,
+                       balance BIGINT NOT NULL DEFAULT 0
+);
