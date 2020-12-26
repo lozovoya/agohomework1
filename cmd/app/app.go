@@ -162,8 +162,80 @@ func (s *Server) Token(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) GetCards(w http.ResponseWriter, r *http.Request) {
 
-	value := r.Context().Value(md.RolesContextKey)
-	log.Println(value)
-	w.Write([]byte("value"))
+	userid, ok := r.Context().Value(md.UserIdContextKey).(int)
+	if !ok {
+		log.Println(ok)
+		return
+	}
+
+	conn, err := s.pool.Acquire(s.ctx)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer conn.Release()
+
+	var roles []string
+	err = conn.QueryRow(s.ctx, "SELECT roles FROM users WHERE id=$1", userid).Scan(&roles)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	if strings.Contains(roles[0], "ADMIN") {
+		rows, err := conn.Query(s.ctx, "SELECT number, balance FROM cards")
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		defer rows.Close()
+		var cards []*dto.CardDTO
+		for rows.Next() {
+			card := &dto.CardDTO{}
+			err = rows.Scan(&card.Number, &card.Balance)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			cards = append(cards, card)
+		}
+
+		w.Header().Set("Content-type", "application/json")
+		w.WriteHeader(200)
+		err = json.NewEncoder(w).Encode(cards)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		return
+
+	} else {
+		rows, err := conn.Query(s.ctx, "SELECT number, balance FROM cards WHERE owner=$1", userid)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		defer rows.Close()
+
+		var cards []*dto.CardDTO
+		for rows.Next() {
+			card := &dto.CardDTO{}
+			err = rows.Scan(&card.Number, &card.Balance)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			cards = append(cards, card)
+		}
+
+		w.Header().Set("Content-type", "application/json")
+		w.WriteHeader(200)
+		err = json.NewEncoder(w).Encode(cards)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		return
+	}
 
 }

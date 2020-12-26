@@ -11,6 +11,28 @@ Content-Type: application/json
   "roles":"{ADMIN USER}"
 }
 
+### Добавление пользователя
+###
+POST http://localhost:9999/api/users
+Content-Type: application/json
+
+{
+  "login":"user2",
+  "password":"pass2",
+  "roles":"{USER}"
+}
+
+### Добавление пользователя
+###
+POST http://localhost:9999/api/users
+Content-Type: application/json
+
+{
+  "login":"user3",
+  "password":"pass3",
+  "roles":"{USER}"
+}
+
 ### Добавление кривого пользователя
 ###
 POST http://localhost:9999/api/users
@@ -41,11 +63,20 @@ Content-Type: application/json
   "password":"pass1"
 }
 
-### Запрос карт
+### Запрос карт ADMIN
 ###
 POST http://localhost:9999/api/getcards
 Content-Type: application/json
 
 {
   "token":"$2a$04$UbNb.53ITxGx3H6tGtthqeAGR/Bfp79M5na2iNeYfVQp62K9a/5XO"
+}
+
+### Запрос карт USER
+###
+POST http://localhost:9999/api/getcards
+Content-Type: application/json
+
+{
+  "token":"$2a$04$j2vjQSQJr5/n7Y2f7jx33OLfTGsxgEaY9kchaQqOSD41kNBEfeOVW"
 }

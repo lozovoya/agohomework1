@@ -8,7 +8,7 @@ CREATE TABLE users (
 
 CREATE TABLE cards (
                        id BIGSERIAL PRIMARY KEY,
-                       number INT NOT NULL UNIQUE,
+                       number TEXT NOT NULL UNIQUE,
                        owner BIGINT NOT NULL REFERENCES users,
                        balance BIGINT NOT NULL DEFAULT 0
 );

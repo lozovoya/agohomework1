@@ -9,8 +9,8 @@ import (
 	"net/http"
 )
 
-var identifierContextKey = &contextKey{"identifier context"}
-var RolesContextKey = &contextKey{"roles context"}
+var IdentifierContextKey = &contextKey{"identifier context"}
+var UserIdContextKey = &contextKey{"user id"}
 
 type contextKey struct {
 	name string
@@ -31,7 +31,7 @@ func IdentMD(handler http.Handler) http.Handler {
 		}
 
 		if token.Token != "" {
-			ctx := context.WithValue(r.Context(), identifierContextKey, &token.Token)
+			ctx := context.WithValue(r.Context(), IdentifierContextKey, &token.Token)
 			r = r.WithContext(ctx)
 		}
 
@@ -44,7 +44,7 @@ func AuthMD(dbCtx context.Context, pool *pgxpool.Pool) func(http.Handler) http.H
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-			token, _ := r.Context().Value(identifierContextKey).(*string)
+			token, _ := r.Context().Value(IdentifierContextKey).(*string)
 
 			conn, err := pool.Acquire(dbCtx)
 			if err != nil {
@@ -57,15 +57,16 @@ func AuthMD(dbCtx context.Context, pool *pgxpool.Pool) func(http.Handler) http.H
 			}
 			defer conn.Release()
 
-			var roles []string
-			err = conn.QueryRow(dbCtx, "SELECT roles FROM users WHERE password=$1", token).Scan(&roles)
+			var userid int
+			err = conn.QueryRow(dbCtx, "SELECT id FROM users WHERE password=$1", token).Scan(&userid)
 			if err != nil {
 				log.Println(err)
+				w.WriteHeader(http.StatusForbidden)
 				return
 			}
 
-			if roles != nil {
-				ctx := context.WithValue(r.Context(), RolesContextKey, roles)
+			if userid != 0 {
+				ctx := context.WithValue(r.Context(), UserIdContextKey, userid)
 				r = r.WithContext(ctx)
 			}
 

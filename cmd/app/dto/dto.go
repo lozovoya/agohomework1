@@ -22,3 +22,8 @@ type TokenRequest struct {
 type TokenDTO struct {
 	Token string `json:"token"`
 }
+
+type CardDTO struct {
+	Number  string `json:"number"`
+	Balance int    `json:"balance"`
+}
