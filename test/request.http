@@ -53,7 +53,7 @@ Content-Type: application/json
   "password":"pass1"
 }
 
-### Запрос токена
+### Запрос токена Admin
 ###
 POST http://localhost:9999/api/token
 Content-Type: application/json
@@ -63,13 +63,23 @@ Content-Type: application/json
   "password":"pass1"
 }
 
+### Запрос токена User
+###
+POST http://localhost:9999/api/token
+Content-Type: application/json
+
+{
+  "login":"user2",
+  "password":"pass2"
+}
+
 ### Запрос карт ADMIN
 ###
 POST http://localhost:9999/api/getcards
 Content-Type: application/json
 
 {
-  "token":"4bdd15ad-3f41-4f67-8e76-c5aca1a92286"
+  "token":"1e62ec2e-cb2a-4728-80f6-6d467d5f8ad8"
 }
 
 ### Запрос карт USER
@@ -78,5 +88,5 @@ POST http://localhost:9999/api/getcards
 Content-Type: application/json
 
 {
-  "token":"$2a$04$j2vjQSQJr5/n7Y2f7jx33OLfTGsxgEaY9kchaQqOSD41kNBEfeOVW"
+  "token":"5c6d7950-9163-4152-b2a8-08001fa9c3b8"
 }
