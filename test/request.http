@@ -69,7 +69,7 @@ POST http://localhost:9999/api/getcards
 Content-Type: application/json
 
 {
-  "token":"$2a$04$UbNb.53ITxGx3H6tGtthqeAGR/Bfp79M5na2iNeYfVQp62K9a/5XO"
+  "token":"4bdd15ad-3f41-4f67-8e76-c5aca1a92286"
 }
 
 ### Запрос карт USER

@@ -58,7 +58,7 @@ func AuthMD(dbCtx context.Context, pool *pgxpool.Pool) func(http.Handler) http.H
 			defer conn.Release()
 
 			var userid int
-			err = conn.QueryRow(dbCtx, "SELECT id FROM users WHERE password=$1", token).Scan(&userid)
+			err = conn.QueryRow(dbCtx, "SELECT id FROM users WHERE token=$1", token).Scan(&userid)
 			if err != nil {
 				log.Println(err)
 				w.WriteHeader(http.StatusForbidden)

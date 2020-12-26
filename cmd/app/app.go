@@ -22,6 +22,7 @@ var (
 	ErrParse         = errors.New("body parse error")
 	ErrServer        = errors.New("internal server error")
 	ErrWrongUser     = errors.New("username already exist")
+	ErrWrongCred     = errors.New("wrong credentials")
 )
 
 type Server struct {
@@ -135,19 +136,37 @@ func (s *Server) Token(w http.ResponseWriter, r *http.Request) {
 	var hash *[]byte
 	err = conn.QueryRow(s.ctx, "SELECT password FROM USERS WHERE login=$1", user.Login).Scan(&hash)
 	if err != nil {
-		log.Println(err)
+		log.Println(ErrServer)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword(*hash, []byte(user.Password))
 	if err != nil {
-		log.Println(err)
+		log.Println(ErrWrongCred)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	token, err := uuid.NewRandom()
 	if err != nil {
-		log.Println(err)
+		log.Println(ErrServer)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	conn, err = s.pool.Acquire(s.ctx)
+	if err != nil {
+		log.Println(ErrServer)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	defer conn.Release()
+
+	_, err = conn.Query(s.ctx, "UPDATE users SET token=$1 WHERE login=$2", token.String(), user.Login)
+	if err != nil {
+		log.Println(ErrServer)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -165,12 +184,15 @@ func (s *Server) GetCards(w http.ResponseWriter, r *http.Request) {
 	userid, ok := r.Context().Value(md.UserIdContextKey).(int)
 	if !ok {
 		log.Println(ok)
+		log.Println(ErrServer)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	conn, err := s.pool.Acquire(s.ctx)
 	if err != nil {
-		log.Println(err)
+		log.Println(ErrServer)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	defer conn.Release()
@@ -178,14 +200,16 @@ func (s *Server) GetCards(w http.ResponseWriter, r *http.Request) {
 	var roles []string
 	err = conn.QueryRow(s.ctx, "SELECT roles FROM users WHERE id=$1", userid).Scan(&roles)
 	if err != nil {
-		log.Println(err)
+		log.Println(ErrServer)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	if strings.Contains(roles[0], "ADMIN") {
 		rows, err := conn.Query(s.ctx, "SELECT number, balance FROM cards")
 		if err != nil {
-			log.Println(err)
+			log.Println(ErrServer)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		defer rows.Close()
@@ -194,7 +218,8 @@ func (s *Server) GetCards(w http.ResponseWriter, r *http.Request) {
 			card := &dto.CardDTO{}
 			err = rows.Scan(&card.Number, &card.Balance)
 			if err != nil {
-				log.Println(err)
+				log.Println(ErrServer)
+				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 			cards = append(cards, card)

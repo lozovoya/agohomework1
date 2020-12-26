@@ -2,6 +2,7 @@ CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     login TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
+    token TEXT,
     roles TEXT[] NOT NULL DEFAULT '{}',
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
