@@ -51,10 +51,6 @@ func AuthMD(dbCtx context.Context, pool *pgxpool.Pool) func(http.Handler) http.H
 				log.Println(err)
 				return
 			}
-			if err != nil {
-				log.Println(err)
-				return
-			}
 			defer conn.Release()
 
 			var userid int
