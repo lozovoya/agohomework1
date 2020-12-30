@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/go-chi/chi"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/lozovoya/agohomework1.git/cmd/app"
+	"github.com/lozovoya/agohomework1/cmd/app"
 	"log"
 	"net"
 	"net/http"

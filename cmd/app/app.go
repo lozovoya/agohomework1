@@ -8,8 +8,8 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/lozovoya/agohomework1.git/cmd/app/dto"
-	"github.com/lozovoya/agohomework1.git/cmd/app/md"
+	"github.com/lozovoya/agohomework1/cmd/app/dto"
+	"github.com/lozovoya/agohomework1/cmd/app/md"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
@@ -68,13 +68,6 @@ func (s *Server) AddUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conn, err := s.pool.Acquire(s.ctx)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	defer conn.Release()
-
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.MinCost)
 	if err != nil {
 		log.Println(err)
@@ -82,7 +75,7 @@ func (s *Server) AddUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var id int
-	err = conn.QueryRow(s.ctx,
+	err = s.pool.QueryRow(s.ctx,
 		"INSERT INTO USERS (login, password, roles) VALUES($1, $2, $3) ON CONFLICT DO NOTHING  RETURNING id",
 		user.Login, hash, user.Roles).Scan(&id)
 	if err != nil {
@@ -126,15 +119,8 @@ func (s *Server) Token(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conn, err := s.pool.Acquire(s.ctx)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	defer conn.Release()
-
 	var hash *[]byte
-	err = conn.QueryRow(s.ctx, "SELECT password FROM USERS WHERE login=$1", user.Login).Scan(&hash)
+	err = s.pool.QueryRow(s.ctx, "SELECT password FROM USERS WHERE login=$1", user.Login).Scan(&hash)
 	if err != nil {
 		log.Println(ErrServer)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -155,15 +141,7 @@ func (s *Server) Token(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conn, err = s.pool.Acquire(s.ctx)
-	if err != nil {
-		log.Println(ErrServer)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer conn.Release()
-
-	_, err = conn.Query(s.ctx, "UPDATE users SET token=$1 WHERE login=$2", token.String(), user.Login)
+	_, err = s.pool.Query(s.ctx, "UPDATE users SET token=$1 WHERE login=$2", token.String(), user.Login)
 	if err != nil {
 		log.Println(ErrServer)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -189,16 +167,8 @@ func (s *Server) GetCards(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conn, err := s.pool.Acquire(s.ctx)
-	if err != nil {
-		log.Println(ErrServer)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer conn.Release()
-
 	var roles []string
-	err = conn.QueryRow(s.ctx, "SELECT roles FROM users WHERE id=$1", userid).Scan(&roles)
+	err := s.pool.QueryRow(s.ctx, "SELECT roles FROM users WHERE id=$1", userid).Scan(&roles)
 	if err != nil {
 		log.Println(ErrServer)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -206,7 +176,7 @@ func (s *Server) GetCards(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if strings.Contains(roles[0], "ADMIN") {
-		rows, err := conn.Query(s.ctx, "SELECT number, balance FROM cards")
+		rows, err := s.pool.Query(s.ctx, "SELECT number, balance FROM cards")
 		if err != nil {
 			log.Println(ErrServer)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -235,9 +205,9 @@ func (s *Server) GetCards(w http.ResponseWriter, r *http.Request) {
 		return
 
 	} else {
-		rows, err := conn.Query(s.ctx, "SELECT number, balance FROM cards WHERE owner=$1", userid)
+		rows, err := s.pool.Query(s.ctx, "SELECT number, balance FROM cards WHERE owner=$1", userid)
 		if err != nil {
-			log.Println(err)
+			log.Println(ErrServer)
 			return
 		}
 		defer rows.Close()
