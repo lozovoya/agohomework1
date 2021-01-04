@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/lozovoya/agohomework1.git/cmd/app/dto"
+	"github.com/lozovoya/agohomework1/cmd/app/dto"
 	"log"
 	"net/http"
 )
